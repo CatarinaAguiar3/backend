@@ -17,5 +17,5 @@ def conectar():
         port=int(os.getenv("MYSQL_PORT", "3306")),
         user=os.getenv("MYSQL_USER", "root"),
         password=os.getenv("MYSQL_PASSWORD", "1234"),
-        database=os.getenv("MYSQL_DATABASE", "escola_mcp"),
+        database=os.getenv("MYSQL_DATABASE", "escola"),
     )
