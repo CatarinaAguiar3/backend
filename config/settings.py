@@ -91,6 +91,7 @@ USE_TZ = True
 
 # Pasta publica para arquivos estaticos.
 STATIC_URL = "static/"
+
 # Tipo padrao de chave primaria para modelos.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
