@@ -6,9 +6,12 @@ from django.views.decorators.http import require_http_methods
 
 from .services.alunos import (AlunoNaoEncontrado, atualizar_idade_dados,
                               cadastrar_aluno_dados, listar_alunos_dados,
-                              remover_aluno_dados)
+                              remover_aluno_dados, media_idade_dados, contar_alunos_dados)
 from .services.chat import responder_com_mcp
 
+from .services.professores import (ProfessorNaoEncontrado, atualizar_idade_professor_dados,
+                                   cadastrar_professor_dados, listar_professores_dados,
+                                   remover_professor_dados, media_idade_professores_dados, contar_professores_dados)
 
 def _parse_json_body(request):
     if not request.body:
@@ -65,6 +68,68 @@ def aluno_detail(request, nome):
     except AlunoNaoEncontrado as exc:
         return _erro(str(exc), status=404)
 
+@require_http_methods(["GET"])
+def alunos_media_idade(request):
+    resultado = media_idade_dados()
+    return JsonResponse({"media_idade": resultado})
+
+
+@require_http_methods(["GET"])
+def alunos_contagem(request):
+    resultado = contar_alunos_dados()
+    return JsonResponse({"contagem": resultado})
+
+###############
+# PROFESSORES #
+###############
+@csrf_exempt
+@require_http_methods(["GET", "POST"])
+def professores_collection(request):
+    if request.method == "GET":
+        return JsonResponse({"professores": listar_professores_dados()})
+
+    try:
+        payload = _parse_json_body(request)
+        nome = str(payload.get("nome", "")).strip()
+        idade = int(payload.get("idade"))
+        if not nome:
+            return _erro("Informe o nome do professor.")
+
+        professor = cadastrar_professor_dados(nome, idade)
+        return JsonResponse({"message": "Professor cadastrado com sucesso.", "professor": professor}, status=201)
+    except (TypeError, ValueError):
+        return _erro("Informe nome e idade válidos.")
+
+
+@csrf_exempt
+@require_http_methods(["PATCH", "PUT", "DELETE"])
+def professor_detail(request, nome):
+    try:
+        if request.method in {"PATCH", "PUT"}:
+            payload = _parse_json_body(request)
+            idade = int(payload.get("idade"))
+            professor = atualizar_idade_professor_dados(nome, idade)
+            return JsonResponse({"message": "Idade atualizada.", "professor": professor})
+
+        remover_professor_dados(nome)
+        return JsonResponse({"message": "Professor removido."})
+    except (TypeError, ValueError):
+        return _erro("Informe uma idade válida.")
+    except ProfessorNaoEncontrado as exc:
+        return _erro(str(exc), status=404)
+    
+
+@require_http_methods(["GET"])
+def professores_media_idade(request):
+    resultado = media_idade_professores_dados()
+    return JsonResponse({"media_idade": resultado})
+
+
+@require_http_methods(["GET"])
+def professores_contagem(request):
+    resultado = contar_professores_dados()
+    return JsonResponse({"contagem": resultado})    
+############
 
 @csrf_exempt
 @require_http_methods(["POST"])

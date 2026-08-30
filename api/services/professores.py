@@ -1,28 +1,28 @@
 from .mysql import conectar
 
 
-class AlunoNaoEncontrado(Exception):
-    # Excecao usada quando uma operacao tenta acessar um aluno inexistente.
+class ProfessorNaoEncontrado(Exception):
+    # Excecao usada quando uma operacao tenta acessar um professor inexistente.
     pass
 
 
-def listar_alunos_dados():
-    # Consulta todos os alunos e devolve a resposta em formato simples para a API.
+def listar_professores_dados():
+    # Consulta todos os professores e devolve a resposta em formato simples para a API.
     conexao = conectar()
     cursor = conexao.cursor()
-    cursor.execute("SELECT nome, idade FROM alunos ORDER BY nome")
+    cursor.execute("SELECT nome, idade FROM professores ORDER BY nome")
     dados = cursor.fetchall()
     cursor.close()
     conexao.close()
     return [{"nome": nome, "idade": idade} for nome, idade in dados]
 
 
-def cadastrar_aluno_dados(nome: str, idade: int):
-    # Insere um novo aluno no banco e devolve os dados cadastrados.
+def cadastrar_professor_dados(nome: str, idade: int):
+    # Insere um novo professor no banco e devolve os dados cadastrados.
     conexao = conectar()
     cursor = conexao.cursor()
     cursor.execute(
-        "INSERT INTO alunos(nome, idade) VALUES(%s, %s)",
+        "INSERT INTO professores(nome, idade) VALUES(%s, %s)",
         (nome, idade),
     )
     conexao.commit()
@@ -31,13 +31,13 @@ def cadastrar_aluno_dados(nome: str, idade: int):
     return {"nome": nome, "idade": idade}
 
 
-def atualizar_idade_dados(nome: str, idade: int):
-    # Atualiza a idade de um aluno existente e valida se houve alteracao.
+def atualizar_idade_professor_dados(nome: str, idade: int):
+    # Atualiza a idade de um professor existente e valida se houve alteracao.
     conexao = conectar()
     cursor = conexao.cursor()
     cursor.execute(
         """
-        UPDATE alunos
+        UPDATE professores  
         SET idade=%s
         WHERE nome=%s
         """,
@@ -46,35 +46,35 @@ def atualizar_idade_dados(nome: str, idade: int):
     if cursor.rowcount == 0:
         cursor.close()
         conexao.close()
-        raise AlunoNaoEncontrado(f"Aluno '{nome}' não encontrado.")
+        raise ProfessorNaoEncontrado(f"Professor '{nome}' não encontrado.")
     conexao.commit()
     cursor.close()
     conexao.close()
     return {"nome": nome, "idade": idade}
 
 
-def remover_aluno_dados(nome: str):
-    # Remove um aluno pelo nome e aponta erro se nenhum registro for encontrado.
+def remover_professor_dados(nome: str):
+    # Remove um professor pelo nome e aponta erro se nenhum registro for encontrado.
     conexao = conectar()
     cursor = conexao.cursor()
-    cursor.execute("DELETE FROM alunos WHERE nome=%s", (nome,))
+    cursor.execute("DELETE FROM professores WHERE nome=%s", (nome,))
     if cursor.rowcount == 0:
         cursor.close()
         conexao.close()
-        raise AlunoNaoEncontrado(f"Aluno '{nome}' não encontrado.")
+        raise ProfessorNaoEncontrado(f"Professor '{nome}' não encontrado.")
     conexao.commit()
     cursor.close()
     conexao.close()
     return {"nome": nome}
 
 
-def media_idade_dados():
+def media_idade_professores_dados():
     conexao = conectar()
 
     cursor = conexao.cursor()
     cursor.execute(
         """
-        SELECT AVG(idade) FROM alunos
+        SELECT AVG(idade) FROM professores  
         """
     )
     #fetchone() busca a primeira linha retornada pelo SELECT e [0] pega o primeiro valor dessa linha
@@ -89,18 +89,18 @@ def media_idade_dados():
 
 
 
-def contar_alunos_dados():
+def contar_professores_dados():
     conexao = conectar()
 
     cursor = conexao.cursor()
     cursor.execute(
         """
-        SELECT COUNT(*) FROM alunos"""
+        SELECT COUNT(*) FROM professores"""
     )
     contagem = cursor.fetchone()[0]
     # conexao.commit() # Aqui não precisa, só é usado se fosse alterar algo no banco de dados
 
     cursor.close()
     conexao.close()
-    # return f"O número de alunos cadastrados é {contagem}."
-    return f"{contagem} alunos cadastrados."
+    # return f"O número de professores cadastrados é {contagem}."
+    return f"{contagem} professores cadastrados."
